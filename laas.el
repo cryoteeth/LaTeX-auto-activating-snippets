@@ -197,7 +197,7 @@ it is restored only once."
      (delete-char -1) ;; delete the previous / that isn't part of the key
      (cond
       ((featurep 'tempel)
-       (tempel-insert (list "\\frac{" 'p "}{" 'p "}")))
+       (tempel-insert (list "\\frac{" 'p "}{" 'q "}")))
       ((featurep 'yasnippet)
        (yas-expand-snippet "\\frac{$1}{$2}$0"))
       (t (insert "\\frac{}{}")
@@ -218,7 +218,7 @@ it is restored only once."
        (delete-region start end)
        (cond
         ((featurep 'tempel)
-         (tempel-insert (list "\\frac{" content "}{" 'p "}")))
+         (tempel-insert (list "\\frac{" content "}{" 'q "}")))
         ((featurep 'yasnippet)
          (yas-expand-snippet (format "\\frac{%s}{$2}$0" content)))
         (t (insert "\\frac{" content "}{}")
