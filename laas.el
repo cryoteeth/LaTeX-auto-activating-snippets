@@ -17,9 +17,13 @@
 ;;; Commentary:
 ;;
 ;; Make use of the auto-activating-snippets engine to provide an expansive
-;; collection of LaTeX snippets. Primaraly covering: operators, symbols,
+;; collection of LaTeX snippets. Primarily covering: operators, symbols,
 ;; accents, subscripts, and a few fraction forms.
 ;;
+;; Ideas:
+;; Get the length of the previous word to switch between \sym and \math variants of commands
+;; (for unicode-math)
+;; `laas-length-previous-object' handles the length of the string, but needs incorporating
 ;;; Code:
 
 (require 'aas)
@@ -84,7 +88,7 @@ insert a new subscript (e.g a -> a_1)."
         ((and (or (= (char-before (1- (point))) ?_)
                   (= (char-before (1- (point))) ?^))
               (/= (char-before) ?{))
-              (laas-mathp)
+         (laas-mathp)
          'extended-sub)
         ((and
           ;; Before is some indexable char
@@ -125,10 +129,14 @@ insert a new subscript (e.g a -> a_1)."
         (goto-char (laas-identify-adjacent-tex-object))) ; yay recursion
       (point)))))
 
+(defun laas-length-previous-object ()
+  "Return the length of the left-adjacent TeX object from POINT."
+   (- (point) (laas-identify-adjacent-tex-object)))
+
 (defun laas-wrap-previous-object (tex-cmd)
   "Wrap previous TeX object in TEX-COMMAND.
-TEX-cmd can be a string like \"textbf\", a cons like
-(\"{\\textstyle\" . \"}\"), or a function that would be called
+TEX-CMD can be a string like \"textbf\", a cons like (\"{\\textstyle\" . \"}\"),
+or a function that would be called
 and is expected to return a string or cons."
   (interactive)
   (let ((start (laas-identify-adjacent-tex-object))
@@ -153,7 +161,7 @@ and is expected to return a string or cons."
         (insert left)))))
 
 (defun laas-object-on-left-condition ()
-  "Return t if there is a TeX object imidiately to the left."
+  "Return t if there is a TeX object immediately to the left."
   ;; TODO use `laas-identify-adjacent-tex-object'
   (and (or (<= ?a (char-before) ?z)
            (<= ?A (char-before) ?Z)
@@ -406,7 +414,7 @@ it is restored only once."
 (defvar laas-frac-snippet
   '(:cond laas-frac-cond
     :expansion-desc "See the docs of `laas-frac-snippet'"
-    "/" laas-smart-fraction)
+    "//" laas-smart-fraction)
   "Frac snippet.
 Expand to a template frac after //, or wrap the object before point if it
 isn't /.
@@ -419,12 +427,24 @@ ab/ => \\frac{ab}{}
   (or (derived-mode-p 'latex-mode)
       (laas-mathp)))
 
-(defun laas-accent--rm () (interactive)   (laas-wrap-previous-object (if (laas-mathp) "mathrm" "textrm")))
-(defun laas-accent--it () (interactive)   (laas-wrap-previous-object (if (laas-mathp) "mathit" "textit")))
-(defun laas-accent--bf () (interactive)   (laas-wrap-previous-object (if (laas-mathp) "mathbf" "textbf")))
-(defun laas-accent--emph () (interactive) (laas-wrap-previous-object (if (laas-mathp) "mathem" "emph")))
-(defun laas-accent--tt () (interactive)   (laas-wrap-previous-object (if (laas-mathp) "mathtt" "texttt")))
-(defun laas-accent--sf () (interactive)   (laas-wrap-previous-object (if (laas-mathp) "mathsf" "textsf")))
+(defun laas-accent--rm ()
+  (interactive)
+  (laas-wrap-previous-object (if (laas-mathp) "mathrm" "textrm")))
+(defun laas-accent--it ()
+  (interactive)
+  (laas-wrap-previous-object (if (laas-mathp) "mathit" "textit")))
+(defun laas-accent--bf ()
+  (interactive)
+  (laas-wrap-previous-object (if (laas-mathp) "mathbf" "textbf")))
+(defun laas-accent--emph ()
+  (interactive)
+  (laas-wrap-previous-object (if (laas-mathp) "mathem" "emph")))
+(defun laas-accent--tt ()
+  (interactive)
+  (laas-wrap-previous-object (if (laas-mathp) "mathtt" "texttt")))
+(defun laas-accent--sf ()
+  (interactive)
+  (laas-wrap-previous-object (if (laas-mathp) "mathsf" "textsf")))
 (defvar laas-accent-snippets
   `(;; work in both normal latex text and math
     :cond laas-latex-accent-cond
