@@ -131,7 +131,7 @@ insert a new subscript (e.g a -> a_1)."
 
 (defun laas-length-previous-object ()
   "Return the length of the left-adjacent TeX object from POINT."
-   (- (point) (laas-identify-adjacent-tex-object)))
+  (- (point) (laas-identify-adjacent-tex-object)))
 
 (defun laas-wrap-previous-object (tex-cmd)
   "Wrap previous TeX object in TEX-COMMAND.
@@ -429,37 +429,52 @@ ab/ => \\frac{ab}{}
 
 (defun laas-accent--rm ()
   (interactive)
-  (laas-wrap-previous-object (if (laas-mathp) "mathrm" "textrm")))
+  (laas-wrap-previous-object (if (laas-mathp)
+                                 (if (eq (laas-length-previous-object) 1) "symup" "mathrm")
+                               "textrm")))
 (defun laas-accent--it ()
   (interactive)
-  (laas-wrap-previous-object (if (laas-mathp) "mathit" "textit")))
+  (laas-wrap-previous-object (if (laas-mathp)
+                                 (if (eq (laas-length-previous-object) 1) "symit" "mathit")
+                               "textit")))
 (defun laas-accent--bf ()
   (interactive)
-  (laas-wrap-previous-object (if (laas-mathp) "mathbf" "textbf")))
+  (laas-wrap-previous-object (if (laas-mathp)
+                                 (if (eq (laas-length-previous-object) 1) "symbf" "mathbf")
+                               "textbf")))
 (defun laas-accent--emph ()
   (interactive)
   (laas-wrap-previous-object (if (laas-mathp) "mathem" "emph")))
 (defun laas-accent--tt ()
   (interactive)
-  (laas-wrap-previous-object (if (laas-mathp) "mathtt" "texttt")))
+  (laas-wrap-previous-object (if (laas-mathp)
+                                 (if (eq (laas-length-previous-object) 1) "symtt" "mathtt")
+                               "texttt")))
 (defun laas-accent--sf ()
   (interactive)
-  (laas-wrap-previous-object (if (laas-mathp) "mathsf" "textsf")))
+  (laas-wrap-previous-object (if (laas-mathp)
+                                 (if (eq (laas-length-previous-object) 1) "symsf" "mathsf")
+                               "textsf")))
+(defun laas-accent--bb ()
+  (interactive)
+  (laas-wrap-previous-object (if (eq (laas-length-previous-object) 1) "symbb" "mathbb")))
+
 (defvar laas-accent-snippets
   `(;; work in both normal latex text and math
     :cond laas-latex-accent-cond
-    :expansion-desc "Wrap in \\mathrm{} or \\textrm{}"     "'r" laas-accent--rm
-    :expansion-desc "Wrap in \\mathit{} or \\textit{}"     "'i" laas-accent--it
-    :expansion-desc "Wrap in \\mathbf{} or \\textbf{}"     "'b" laas-accent--bf
-    :expansion-desc "Wrap in \\mathemph{} or \\textemph{}" "'e" laas-accent--emph
-    :expansion-desc "Wrap in \\mathtt{} or \\texttt{}"     "'y" laas-accent--tt
-    :expansion-desc "Wrap in \\mathsf{} or \\textsf{}"     "'f" laas-accent--sf
+    :expansion-desc "Wrap in upright"     "'r" laas-accent--rm
+    :expansion-desc "Wrap in italic"     "'i" laas-accent--it
+    :expansion-desc "Wrap in bold"     "'b" laas-accent--bf
+    :expansion-desc "Wrap in emphasis" "'e" laas-accent--emph
+    :expansion-desc "Wrap in monospace"     "'y" laas-accent--tt
+    :expansion-desc "Wrap in serif"     "'f" laas-accent--sf
+     :expansion-desc "Wrap in blackboard" "'k" laas-accent--bb
     ;; only normal latex text, no math
     :cond (lambda () (and (derived-mode-p 'latex-mode) (not (laas-mathp))))
     :expansion-desc "Wrap in \\textsl"
     "'l" (lambda () (interactive) (laas-wrap-previous-object "textsl"))
     ;; only math
-    :cond laas-object-on-left-condition
+    :cond laas-object-on-left-condition ; TEST
     ,@(cl-loop for (key . exp)
                in '(("'." . "dot")
                     ("':" . "ddot")
