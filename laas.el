@@ -131,6 +131,7 @@ insert a new subscript (e.g a -> a_1)."
 
 (defun laas-length-previous-object ()
   "Return the length of the left-adjacent TeX object from POINT."
+  ;; FIXME: currently can't handle TeX symbols (e.g. \nabla)
   (- (point) (laas-identify-adjacent-tex-object)))
 
 (defun laas-wrap-previous-object (tex-cmd)
@@ -205,7 +206,7 @@ it is restored only once."
      (delete-char -1) ;; delete the previous / that isn't part of the key
      (cond
       ((featurep 'tempel)
-       (tempel-insert (list "\\frac{" 'p "}{" 'q "}")))
+       (tempel-insert (list "\\frac{" 'p "}{" 'p "}")))
       ((featurep 'yasnippet)
        (yas-expand-snippet "\\frac{$1}{$2}$0"))
       (t (insert "\\frac{}{}")
@@ -226,7 +227,7 @@ it is restored only once."
        (delete-region start end)
        (cond
         ((featurep 'tempel)
-         (tempel-insert (list "\\frac{" content "}{" 'q "}")))
+         (tempel-insert (list "\\frac{" content "}{" 'p "}")))
         ((featurep 'yasnippet)
          (yas-expand-snippet (format "\\frac{%s}{$2}$0" content)))
         (t (insert "\\frac{" content "}{}")
@@ -247,7 +248,7 @@ it is restored only once."
     "<="    "\\leq"
     "<>"    "\\diamond"
     "=<"    "\\impliedby"
-    "=="    "&="
+    "=="    "&= "
     "=>"    "\\implies"
     ">="    "\\geq"
     ">>"    "\\gg"
@@ -468,7 +469,7 @@ ab/ => \\frac{ab}{}
     :expansion-desc "Wrap in emphasis" "'e" laas-accent--emph
     :expansion-desc "Wrap in monospace"     "'y" laas-accent--tt
     :expansion-desc "Wrap in serif"     "'f" laas-accent--sf
-     :expansion-desc "Wrap in blackboard" "'k" laas-accent--bb
+    :expansion-desc "Wrap in blackboard" "'k" laas-accent--bb
     ;; only normal latex text, no math
     :cond (lambda () (and (derived-mode-p 'latex-mode) (not (laas-mathp))))
     :expansion-desc "Wrap in \\textsl"
